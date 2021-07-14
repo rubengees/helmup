@@ -24,7 +24,7 @@ type UpdatableDependency struct {
 func (dep UpdatableDependency) String() string {
 	return fmt.Sprintf(
 		"%s (%s): %s -> %s",
-		ansi.Color(dep.Name, "black+b"),
+		dep.Name,
 		dep.Repository,
 		ansi.Color(dep.CurrentVersion, "blue"),
 		ansi.Color(dep.LatestVersion, "green"),
@@ -80,7 +80,7 @@ func groupByRepository(repofile *repo.File, chartfile *chart.Metadata) map[*repo
 				fmt.Sprintf(
 					"Repository %s for %s not found. Ignoring...\n",
 					dependency.Repository,
-					ansi.Color(dependency.Name, "black+b"),
+					dependency.Name,
 				),
 			)
 			continue
@@ -169,7 +169,7 @@ func resolveForRepository(repository *repo.Entry, dependencies ChartDependencies
 				fmt.Println(
 					fmt.Sprintf(
 						"Failed to resolve latest version for dependency %s: %v. Skipping...",
-						ansi.Color(repository.Name, "black+b"),
+						repository.Name,
 						err,
 					),
 				)
