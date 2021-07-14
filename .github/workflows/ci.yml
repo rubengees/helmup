@@ -34,7 +34,8 @@ jobs:
       run: go build -v ./...
 
     - name: Lint
-      uses: morphy2k/revive-action@v2
+      if: matrix.os == 'ubuntu-latest'
+      uses: docker://morphy/revive-action:v2
       with:
         config: revive.toml
 
