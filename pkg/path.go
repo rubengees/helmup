@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"errors"
 	"fmt"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"os"
@@ -23,11 +22,9 @@ func GetProjectPath(args []string) (string, error) {
 		}
 
 		if !stat.IsDir() {
-			return "", errors.New(
-				fmt.Sprintf(
-					"Given path is not a directory. Do not pass the %s file but the containing directory to helmup.",
-					chartutil.ChartfileName,
-				),
+			return "", fmt.Errorf(
+				"given path is not a directory. Do not pass the %s file but the containing directory to helmup",
+				chartutil.ChartfileName,
 			)
 		}
 

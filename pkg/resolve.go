@@ -45,8 +45,13 @@ func (deps UpdatableDependencies) Strings() []string {
 
 type ChartDependencies []*chart.Dependency
 
-func ResolveUpdates(chartfile *chart.Metadata) (UpdatableDependencies, error) {
-	repofile, err := repo.LoadFile(cli.New().RepositoryConfig)
+type ResolverSettings struct {
+	Env     *cli.EnvSettings
+	Getters getter.Providers
+}
+
+func ResolveUpdates(chartfile *chart.Metadata, settings *ResolverSettings) (UpdatableDependencies, error) {
+	repofile, err := repo.LoadFile(settings.Env.RepositoryConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load repositories: %w", err)
 	}
@@ -54,7 +59,7 @@ func ResolveUpdates(chartfile *chart.Metadata) (UpdatableDependencies, error) {
 	groupedDependencies := groupByRepository(repofile, chartfile)
 
 	var result UpdatableDependencies
-	for resolvedDependency := range resolveParallel(groupedDependencies) {
+	for resolvedDependency := range resolveParallel(groupedDependencies, settings) {
 		result = append(result, resolvedDependency)
 	}
 
@@ -101,7 +106,7 @@ func findRepoByURL(repositories []*repo.Entry, url string) *repo.Entry {
 	return nil
 }
 
-func resolveParallel(groupedDependencies map[*repo.Entry]ChartDependencies) <-chan *UpdatableDependency {
+func resolveParallel(groupedDependencies map[*repo.Entry]ChartDependencies, settings *ResolverSettings) <-chan *UpdatableDependency {
 	out := make(chan *UpdatableDependency)
 
 	go func() {
@@ -113,7 +118,7 @@ func resolveParallel(groupedDependencies map[*repo.Entry]ChartDependencies) <-ch
 			wg.Add(1)
 
 			go func(repository *repo.Entry, dependencies ChartDependencies) {
-				for updatableDependency := range resolveForRepository(repository, dependencies) {
+				for updatableDependency := range resolveForRepository(repository, dependencies, settings) {
 					out <- updatableDependency
 				}
 
@@ -127,13 +132,13 @@ func resolveParallel(groupedDependencies map[*repo.Entry]ChartDependencies) <-ch
 	return out
 }
 
-func resolveForRepository(repository *repo.Entry, dependencies ChartDependencies) chan *UpdatableDependency {
+func resolveForRepository(repository *repo.Entry, dependencies ChartDependencies, settings *ResolverSettings) chan *UpdatableDependency {
 	out := make(chan *UpdatableDependency)
 
 	go func() {
 		defer close(out)
 
-		chartRepository, err := repo.NewChartRepository(repository, getter.All(cli.New()))
+		chartRepository, err := repo.NewChartRepository(repository, settings.Getters)
 		if err != nil {
 			fmt.Println(
 				fmt.Sprintf("Failed to update repository %s: %v. Skipping...", repository.Name, err),
@@ -149,7 +154,7 @@ func resolveForRepository(repository *repo.Entry, dependencies ChartDependencies
 			return
 		}
 
-		repositoryIndex := filepath.Join(cli.New().RepositoryCache, helmpath.CacheIndexFile(repository.Name))
+		repositoryIndex := filepath.Join(settings.Env.RepositoryCache, helmpath.CacheIndexFile(repository.Name))
 		loadedIndex, err := repo.LoadIndexFile(repositoryIndex)
 		if err != nil {
 			fmt.Println(

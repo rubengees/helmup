@@ -1,23 +1,20 @@
 package pkg
 
 import (
-	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/downloader"
-	"helm.sh/helm/v3/pkg/getter"
 	"os"
 )
 
-func UpdateCharts(path string) error {
-	helmCli := cli.New()
+func UpdateCharts(path string, settings *ResolverSettings) error {
 	helmDownloader := downloader.Manager{
 		Out:              os.Stdout,
 		ChartPath:        path,
 		Verify:           downloader.VerifyNever,
 		Debug:            false,
 		SkipUpdate:       true,
-		Getters:          getter.All(helmCli),
-		RepositoryConfig: helmCli.RepositoryConfig,
-		RepositoryCache:  helmCli.RepositoryCache,
+		Getters:          settings.Getters,
+		RepositoryConfig: settings.Env.RepositoryConfig,
+		RepositoryCache:  settings.Env.RepositoryCache,
 	}
 
 	err := helmDownloader.Update()

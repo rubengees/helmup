@@ -1,0 +1,16 @@
+apiVersion: v1
+entries:
+  helmup-test:
+    - apiVersion: v2
+      appVersion: 2.4.9
+      created: "2021-07-09T07:39:09.273340051Z"
+      digest: 570fd2aa1e748b8e567d8b490b5602dedfd06d482ab09043a5949fc9b578d4b0
+      home: https://github.com/rubengees/helmup/
+      name: helmup-test
+      sources:
+        - https://github.com/rubengees/helmup
+      type: application
+      urls:
+        - file://testdata/repository/helmup-test-11.0.0.tgz
+      version: 11.0.0
+generated: "2021-07-09T07:39:09.271286101Z"

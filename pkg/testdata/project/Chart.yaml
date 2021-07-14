@@ -1,0 +1,7 @@
+apiVersion: v2
+dependencies:
+  - name: helmup-test
+    repository: file://testdata/repository
+    version: 10.0.0
+name: test
+version: 1.0.0

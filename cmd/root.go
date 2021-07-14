@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
-	. "helmup/pkg"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/getter"
+	"helmup/pkg"
 	"os"
 )
 
@@ -30,17 +32,20 @@ func Execute() {
 }
 
 func run(args []string) error {
-	path, err := GetProjectPath(args)
+	helmCli := cli.New()
+	settings := &pkg.ResolverSettings{Env: helmCli, Getters: getter.All(helmCli)}
+
+	path, err := pkg.GetProjectPath(args)
 	if err != nil {
 		return err
 	}
 
-	chartfile, err := LoadChartfile(path)
+	chartfile, err := pkg.LoadChartfile(path)
 	if err != nil {
 		return err
 	}
 
-	updatableDependencies, err := ResolveUpdates(chartfile)
+	updatableDependencies, err := pkg.ResolveUpdates(chartfile, settings)
 	if err != nil {
 		return err
 	}
@@ -49,7 +54,7 @@ func run(args []string) error {
 		return nil
 	}
 
-	chosenDependencies, err := Prompt(updatableDependencies)
+	chosenDependencies, err := pkg.Prompt(updatableDependencies)
 	if err != nil {
 		return err
 	}
@@ -57,12 +62,12 @@ func run(args []string) error {
 		return nil
 	}
 
-	err = UpdateChartfile(path, chartfile, chosenDependencies)
+	err = pkg.UpdateChartfile(path, chartfile, chosenDependencies)
 	if err != nil {
 		return err
 	}
 
-	err = UpdateCharts(path)
+	err = pkg.UpdateCharts(path, settings)
 	if err != nil {
 		return err
 	}
