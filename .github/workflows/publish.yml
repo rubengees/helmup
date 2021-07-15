@@ -2,21 +2,41 @@ name: Publish
 
 on:
   release:
-    types: [created]
+    types: [ created ]
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64, arm]
+        goos: [ linux, windows, darwin ]
+        goarch: [ amd64 ]
     steps:
       - uses: actions/checkout@v2
 
-      - name: Publish
-        uses: wangyoucao577/go-release-action@v1
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
+          go-version: 1.16
+
+      - name: Set up Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build
+        run: |
+          env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+          go build -v -o helmup-${{ github.event.release.tag_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
+
+      - name: Upload
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: helmup-${{ github.event.release.tag_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          tag: ${{ github.ref }}
