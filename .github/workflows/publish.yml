@@ -31,12 +31,17 @@ jobs:
 
       - name: Build
         run: |
-          env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-          go build -v -o helmup-${{ github.event.release.tag_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          if [[ ${{ matrix.goos }} == 'windows' ]]; then
+            OUTPUT_NAME=helmup-${{ github.event.release.tag_name }}-${{ matrix.goos }}-${{ matrix.goarch }}.exe
+          else
+            OUTPUT_NAME=helmup-${{ github.event.release.tag_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          fi
+          env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -v -o $OUTPUT_NAME
 
       - name: Upload
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: helmup-${{ github.event.release.tag_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
           tag: ${{ github.ref }}
+          file_glob: true
+          file: helmup-*
