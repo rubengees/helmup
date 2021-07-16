@@ -16,12 +16,15 @@ var GitCommit = "manual"
 
 var rootCmd = &cobra.Command{
 	Use:   "helmup [flags] [path]",
-	Short: "Check for updates of your helm dependencies.",
+	Short: "Check for updates of your helm dependencies",
 	Long: `helmup checks for updates of your helm dependencies
-and lets you interactively choose which ones to apply in place.`,
+and lets you interactively choose which ones to apply in place`,
 	Example: "helmup /path/to/helm/directory",
 	Version: fmt.Sprintf("%s (%s)\n%s", Version, GitCommit, runtime.Version()),
 	Args:    cobra.MaximumNArgs(1),
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveFilterDirs
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		notInteractive, err := cmd.Flags().GetBool("no-interactive")
 		if err != nil {
@@ -48,6 +51,7 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolP("no-interactive", "n", false, "only print updates")
+	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 	rootCmd.AddCommand(completionCmd)
 }
 
