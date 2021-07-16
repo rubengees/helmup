@@ -36,7 +36,10 @@ jobs:
           else
             OUTPUT_NAME=helmup-${{ github.event.release.tag_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
           fi
-          env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -v -o $OUTPUT_NAME
+
+          LD_FLAGS="-X 'helmup/cmd.Version=${{ github.event.release.tag_name }}' -X 'helmup/cmd.GitCommit=${GITHUB_SHA::6}'"
+
+          env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="$LD_FLAGS" -v -o "$OUTPUT_NAME"
 
       - name: Upload
         uses: svenstaro/upload-release-action@v2

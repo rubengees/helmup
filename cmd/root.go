@@ -8,17 +8,37 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 	"helmup/pkg"
 	"os"
+	"runtime"
 )
+
+var Version = "0.1.0-SNAPSHOT"
+var GitCommit = "manual"
 
 var rootCmd = &cobra.Command{
 	Use:   "helmup",
 	Short: "Check for updates of your helm dependencies.",
-	Long: `Helmup checks for updates of your helm dependencies
+	Long: `helmup checks for updates of your helm dependencies
 and lets you interactively choose which ones to apply in place.`,
 	Example: "helmup /path/to/helm/directory",
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := run(args); err != nil {
+		shouldPrintVersion, err := cmd.Flags().GetBool("version")
+		if err != nil {
+			cobra.CheckErr(err)
+		}
+
+		if shouldPrintVersion {
+			fmt.Println(fmt.Sprintf("helmup %s (%s)", Version, GitCommit))
+			fmt.Println(runtime.Version())
+			return
+		}
+
+		path, err := pkg.GetProjectPath(args)
+		if err != nil {
+			cobra.CheckErr(err)
+		}
+
+		if err := run(path); err != nil {
 			cobra.CheckErr(err)
 		}
 	},
@@ -31,14 +51,13 @@ func Execute() {
 	}
 }
 
-func run(args []string) error {
+func init() {
+	rootCmd.PersistentFlags().BoolP("version", "v", false, "print the version")
+}
+
+func run(path string) error {
 	helmCli := cli.New()
 	settings := &pkg.ResolverSettings{Env: helmCli, Getters: getter.All(helmCli)}
-
-	path, err := pkg.GetProjectPath(args)
-	if err != nil {
-		return err
-	}
 
 	chartfile, err := pkg.LoadChartfile(path)
 	if err != nil {
