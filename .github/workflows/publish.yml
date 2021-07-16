@@ -37,7 +37,7 @@ jobs:
             OUTPUT_NAME=helmup-${{ github.event.release.tag_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
           fi
 
-          LD_FLAGS="-X 'helmup/cmd.Version=${{ github.event.release.tag_name }}' -X 'helmup/cmd.GitCommit=${GITHUB_SHA::6}'"
+          LD_FLAGS="-X 'helmup/cmd.Version=${{ github.event.release.tag_name }}' -X 'helmup/cmd.GitCommit=${GITHUB_SHA::10}'"
 
           env GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="$LD_FLAGS" -v -o "$OUTPUT_NAME"
 
