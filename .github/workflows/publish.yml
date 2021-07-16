@@ -50,7 +50,7 @@ jobs:
           file: helmup-*
 
       - name: Generate PKGBUILD
-        if: matrix.goos == 'linux' && matrix.goarch == 'amd64"
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
         run: |
           export VERSION="${{ github.event.release.tag_name }}"
           export SOURCE="https://github.com/rubengees/helmup/releases/download/$VERSION/helmup-$VERSION-linux-amd64"
@@ -61,7 +61,7 @@ jobs:
           envsubst <.github/PKGBUILD > PKGBUILD
 
       - name: Publish AUR package
-        if: matrix.goos == 'linux' && matrix.goarch == 'amd64"
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
         uses: KSXGitHub/github-actions-deploy-aur@v2
         with:
           pkgname: helmup-bin
