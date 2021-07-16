@@ -15,7 +15,7 @@ var Version = "0.1.0-SNAPSHOT"
 var GitCommit = "manual"
 
 var rootCmd = &cobra.Command{
-	Use:   "helmup",
+	Use:   "helmup [flags] [path]",
 	Short: "Check for updates of your helm dependencies.",
 	Long: `helmup checks for updates of your helm dependencies
 and lets you interactively choose which ones to apply in place.`,
@@ -47,7 +47,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("no-interactive", "n", false, "only print updates")
+	rootCmd.Flags().BoolP("no-interactive", "n", false, "only print updates")
+	rootCmd.AddCommand(completionCmd)
 }
 
 func run(path string, interactive bool) error {
