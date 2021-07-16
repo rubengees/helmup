@@ -27,6 +27,11 @@ and lets you interactively choose which ones to apply in place.`,
 			cobra.CheckErr(err)
 		}
 
+		notInteractive, err := cmd.Flags().GetBool("no-interactive")
+		if err != nil {
+			cobra.CheckErr(err)
+		}
+
 		if shouldPrintVersion {
 			fmt.Println(fmt.Sprintf("helmup %s (%s)", Version, GitCommit))
 			fmt.Println(runtime.Version())
@@ -38,7 +43,7 @@ and lets you interactively choose which ones to apply in place.`,
 			cobra.CheckErr(err)
 		}
 
-		if err := run(path); err != nil {
+		if err := run(path, !notInteractive); err != nil {
 			cobra.CheckErr(err)
 		}
 	},
@@ -53,9 +58,10 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("version", "v", false, "print the version")
+	rootCmd.PersistentFlags().BoolP("no-interactive", "n", false, "only print updates")
 }
 
-func run(path string) error {
+func run(path string, interactive bool) error {
 	helmCli := cli.New()
 	settings := &pkg.ResolverSettings{Env: helmCli, Getters: getter.All(helmCli)}
 
@@ -70,6 +76,14 @@ func run(path string) error {
 	}
 	if len(updatableDependencies) == 0 {
 		fmt.Println(fmt.Sprintf("All dependencies are %s!", ansi.Color("up to date", "green")))
+		return nil
+	}
+
+	if !interactive {
+		for _, dependency := range updatableDependencies {
+			fmt.Println(dependency.String())
+		}
+
 		return nil
 	}
 
