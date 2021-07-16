@@ -62,7 +62,7 @@ jobs:
 
       - name: Publish AUR package
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
-        uses: KSXGitHub/github-actions-deploy-aur@v2
+        uses: KSXGitHub/github-actions-deploy-aur@v2.2.5
         with:
           pkgname: helmup-bin
           pkgbuild: ./PKGBUILD
