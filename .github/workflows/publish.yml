@@ -53,12 +53,12 @@ jobs:
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
         run: |
           export VERSION="${{ github.event.release.tag_name }}"
-          export SOURCE="https://github.com/rubengees/helmup/releases/download/$VERSION/helmup-$VERSION-linux-amd64"
+          export SOURCE="helmup::https://github.com/rubengees/helmup/releases/download/$VERSION/helmup-$VERSION-linux-amd64"
 
           MD5SUMS=$(md5sum helmup-* | cut -f 1 -d " ")
           export MD5SUMS
 
-          envsubst <.github/PKGBUILD > PKGBUILD
+          envsubst '$VERSION:$SOURCE:$MD5SUMS' <.github/PKGBUILD > PKGBUILD
 
       - name: Publish AUR package
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
