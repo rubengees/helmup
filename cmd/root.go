@@ -20,22 +20,12 @@ var rootCmd = &cobra.Command{
 	Long: `helmup checks for updates of your helm dependencies
 and lets you interactively choose which ones to apply in place.`,
 	Example: "helmup /path/to/helm/directory",
+	Version: fmt.Sprintf("%s (%s)\n%s", Version, GitCommit, runtime.Version()),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		shouldPrintVersion, err := cmd.Flags().GetBool("version")
-		if err != nil {
-			cobra.CheckErr(err)
-		}
-
 		notInteractive, err := cmd.Flags().GetBool("no-interactive")
 		if err != nil {
 			cobra.CheckErr(err)
-		}
-
-		if shouldPrintVersion {
-			fmt.Println(fmt.Sprintf("helmup %s (%s)", Version, GitCommit))
-			fmt.Println(runtime.Version())
-			return
 		}
 
 		path, err := pkg.GetProjectPath(args)
@@ -57,7 +47,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("version", "v", false, "print the version")
 	rootCmd.PersistentFlags().BoolP("no-interactive", "n", false, "only print updates")
 }
 
