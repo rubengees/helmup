@@ -1,7 +1,7 @@
 # helmup
 
-Check your helm chart dependencies for updates and apply them with an interactive selection. Helmup is a self contained
-binary with zero dependencies written in go.
+Check your helm chart dependencies for updates and apply them with an interactive selection. helmup is a self-contained
+binary bundling (parts of) the helm cli written in go.
 
 ### Demo
 
