@@ -53,7 +53,7 @@ jobs:
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
         run: |
           export VERSION="${{ github.event.release.tag_name }}"
-          export SOURCE="helmup::https://github.com/rubengees/helmup/releases/download/$VERSION/helmup-$VERSION-linux-amd64 https://raw.githubusercontent.com/rubengees/helmup/$VERSION/LICENSE.txt"
+          export SOURCE="https://github.com/rubengees/helmup/releases/download/$VERSION/helmup-$VERSION-linux-amd64 https://raw.githubusercontent.com/rubengees/helmup/$VERSION/LICENSE.txt"
 
           MD5SUMS="$(md5sum helmup-* | cut -f 1 -d " ") $(md5sum LICENSE.txt | cut -f 1 -d " ")"
           export MD5SUMS
