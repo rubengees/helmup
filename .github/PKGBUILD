@@ -1,0 +1,14 @@
+# Maintainer: Ruben Gees <rubengees7@gmail.com>
+
+pkgname=helmup-bin
+pkgver=$VERSION
+pkgdesc="Check your helm chart dependencies for updates and apply them with an interactive selection."
+arch=('x86_64')
+url="https://github.com/rubengees/helmup"
+license=('MIT')
+source=($SOURCE)
+md5sums=($MD5SUMS)
+
+package() {
+  install -Dm755 "helmup" "$pkgdir/usr/bin/helmup"
+}

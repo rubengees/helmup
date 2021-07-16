@@ -48,3 +48,25 @@ jobs:
           tag: ${{ github.ref }}
           file_glob: true
           file: helmup-*
+
+      - name: Generate PKGBUILD
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64"
+        run: |
+          export VERSION="${{ github.event.release.tag_name }}"
+          export SOURCE="https://github.com/rubengees/helmup/releases/download/$VERSION/helmup-$VERSION-linux-amd64"
+
+          MD5SUMS=$(md5sum helmup-* | cut -f 1 -d " ")
+          export MD5SUMS
+
+          envsubst <.github/PKGBUILD > PKGBUILD
+
+      - name: Publish AUR package
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64"
+        uses: KSXGitHub/github-actions-deploy-aur@v2
+        with:
+          pkgname: helmup-bin
+          pkgbuild: ./PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update to ${{ github.event.release.tag_name }}
