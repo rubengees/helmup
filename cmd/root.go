@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mattn/go-colorable"
 	"github.com/mgutz/ansi"
@@ -32,12 +33,17 @@ and lets you interactively choose which ones to apply in place`,
 			cobra.CheckErr(err)
 		}
 
+		jsonOutput, err := cmd.Flags().GetBool("json")
+		if err != nil {
+			cobra.CheckErr(err)
+		}
+
 		path, err := pkg.GetProjectPath(args)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
 
-		if err := run(path, !notInteractive); err != nil {
+		if err := run(path, !notInteractive && !jsonOutput, jsonOutput); err != nil {
 			cobra.CheckErr(err)
 		}
 	},
@@ -52,11 +58,12 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolP("no-interactive", "n", false, "only print updates")
+	rootCmd.Flags().BoolP("json", "j", false, "output in json (implies --no-interactive)")
 	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
 	rootCmd.AddCommand(completionCmd)
 }
 
-func run(path string, interactive bool) error {
+func run(path string, interactive bool, jsonOutput bool) error {
 	helmCli := cli.New()
 	settings := &pkg.ResolverSettings{Env: helmCli, Getters: getter.All(helmCli)}
 
@@ -69,7 +76,7 @@ func run(path string, interactive bool) error {
 	if err != nil {
 		return err
 	}
-	if len(updatableDependencies) == 0 {
+	if len(updatableDependencies) == 0 && !jsonOutput {
 		_, _ = fmt.Fprintln(
 			colorable.NewColorableStdout(),
 			fmt.Sprintf("All dependencies are %s!", ansi.Color("up to date", "green")),
@@ -77,9 +84,18 @@ func run(path string, interactive bool) error {
 		return nil
 	}
 
-	if !interactive {
-		for _, dependency := range updatableDependencies {
-			_, _ = fmt.Fprintln(colorable.NewColorableStdout(), fmt.Sprintf("• %s", dependency.String()))
+	if !interactive || jsonOutput {
+		if jsonOutput {
+			jsonDependencies, err := json.MarshalIndent(updatableDependencies, "", "  ")
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(jsonDependencies))
+		} else {
+			for _, dependency := range updatableDependencies {
+				_, _ = fmt.Fprintln(colorable.NewColorableStdout(), fmt.Sprintf("• %s", dependency.String()))
+			}
 		}
 
 		return nil

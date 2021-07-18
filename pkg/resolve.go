@@ -15,10 +15,10 @@ import (
 )
 
 type UpdatableDependency struct {
-	Name           string
-	Repository     string
-	CurrentVersion string
-	LatestVersion  string
+	Name           string `json:"name"`
+	Repository     string `json:"repository"`
+	CurrentVersion string `json:"currentVersion"`
+	LatestVersion  string `json:"latestVersion"`
 }
 
 func (dep UpdatableDependency) String() string {
@@ -58,7 +58,7 @@ func ResolveUpdates(chartfile *chart.Metadata, settings *ResolverSettings) (Upda
 
 	groupedDependencies := groupByRepository(repofile, chartfile)
 
-	var result UpdatableDependencies
+	result := make(UpdatableDependencies, 0)
 	for resolvedDependency := range resolveParallel(groupedDependencies, settings) {
 		result = append(result, resolvedDependency)
 	}
