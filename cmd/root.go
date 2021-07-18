@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/mattn/go-colorable"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/cli"
@@ -69,13 +70,16 @@ func run(path string, interactive bool) error {
 		return err
 	}
 	if len(updatableDependencies) == 0 {
-		fmt.Println(fmt.Sprintf("All dependencies are %s!", ansi.Color("up to date", "green")))
+		_, _ = fmt.Fprintln(
+			colorable.NewColorableStdout(),
+			fmt.Sprintf("All dependencies are %s!", ansi.Color("up to date", "green")),
+		)
 		return nil
 	}
 
 	if !interactive {
 		for _, dependency := range updatableDependencies {
-			fmt.Println(dependency.String())
+			_, _ = fmt.Fprintln(colorable.NewColorableStdout(), fmt.Sprintf("• %s", dependency.String()))
 		}
 
 		return nil
